@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'cspreports',
     'django_referrer_policy',
     'ckeditor',
+    'django_json_ld',
 
     # Django apps
     'django.contrib.admin',
@@ -152,6 +153,11 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "../assets"),
 )
 
+# Fixture files
+# https://docs.djangoproject.com/en/2.2/howto/initial-data/#providing-data-with-fixtures
+
+FIXTURE_DIRS = [os.path.join(BASE_DIR, "../fixtures")]
+
 # User auth model
 AUTH_USER_MODEL = 'troop89_auth.User'
 
@@ -186,12 +192,6 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 # Note: We use the Mozzila's middleware from the django-csp package to send
 # csp headers. We use a third-party package (django-csp-reports) to handle
 # csp policy violation reports.
-#
-# Current CSP is equivalent to:
-# Content-Security-Policu: default-src 'self'; img-src *; report-uri https://{{HOST}}/csp/report/
-
-# Uncomment to have CSP violations reports but not enforced.
-# CSP_REPORT_ONLY = True
 
 CSP_DEFAULT_SRC = ("'self'",)
 

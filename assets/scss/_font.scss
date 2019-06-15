@@ -18,12 +18,8 @@ body {
 
 // Default formatting for anchors
 a {
-  color: get_color(text);
+  color: lighten(get_color(text), 10%);
   text-decoration: underline;
-
-  &:visited {
-    color: lighten(get_color(text), 10%);
-  }
 
   &:hover, &:active, &:focus {
     color: lighten(get_color(text), 20%);
@@ -51,6 +47,19 @@ h1, h2, h3, h4, h5, h6 {
 
     &:hover, &:focus {
       color: lighten(get_color(header_link), 10%);
+    }
+  }
+}
+
+.sidebar {
+  h1, h2 {
+    &:not(:first-child) {
+      margin-top: 30px;
+    }
+
+    &:not(:last-child) {
+      border-bottom: 1px solid lighten(get_color(rule), 20%);
+      padding-bottom: 15px;
     }
   }
 }
