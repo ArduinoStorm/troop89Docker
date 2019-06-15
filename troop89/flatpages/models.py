@@ -6,7 +6,9 @@
 
 from pathlib import PurePath
 
+from django.conf import settings
 from django.contrib.flatpages.models import FlatPage
+from django.contrib.sites.models import Site
 from django.db import models
 from django.db.models.functions import Length
 from django.db.utils import cached_property
@@ -43,7 +45,7 @@ class HierarchicalFlatPageQuerySet(models.QuerySet):
         # If the page has no parent (e.g /about/), do not include
         # a related stem in the url regex so that all other pages
         # with no parent are matched.
-        if related_stem == '/':
+        if str(related_stem) == '/':
             related_stem = ''
 
         return self.exclude(pk=page.pk).filter(url__regex=rf"^{related_stem}/[^/]+/$")
@@ -90,6 +92,34 @@ class HierarchicalFlatPage(FlatPage):
         Return the flatpages which are the logical children of this page.
         """
         return HierarchicalFlatPage.objects.children_for_url(self.url, depth, include_parents)
+
+    @property
+    def sd_breadcrumb(self) -> dict:
+        """Return this page's breadcrumb trail as a structured data dict."""
+        domain = Site.objects.get_current().domain
+        protocol = 'https' if settings.SECURE_SSL_REDIRECT else 'http'
+        item_list = []
+
+        for position, page in enumerate(reversed(self.parent_pages), start=1):
+            item_list.append({
+                "@type": "ListItem",
+                "position": position,
+                "name": page.title,
+                # Absolute url construction as recommended in the Django docs:
+                # https://docs.djangoproject.com/en/dev/ref/contrib/sites/#getting-the-current-domain-for-full-urls
+                "item": f'{protocol}://{domain}{page.url}',
+            })
+        item_list.append({
+                "@type": "ListItem",
+                "position": len(self.parent_pages) + 1,
+                "name": self.title,
+                "item": f'{protocol}://{domain}{self.url}',
+            })
+        return {
+            "@context": "https://schema.org",
+            "@type": 'BreadcrumbList',
+            "itemListElement": item_list,
+        }
 
 
 def _ensure_trailing_slash(url: str) -> str:
